@@ -2110,6 +2110,12 @@ gpr() (
     return 1
   fi
 
+  # Validate that the remote branch exists.
+  if ! git ls-remote --heads origin "$branch_name" | grep --quiet .; then
+    echo "Error: The \"$branch_name\" branch does not exist on the remote host: $host" >&2
+    return 1
+  fi
+
   # First, check for an existing pull request.
   local domain
   if [[ "$host" == "azure-devops-server" ]]; then
