@@ -2699,6 +2699,9 @@ alias tc="rm -rf .terraform .terraform.lock.hcl terraform.tfstate terraform.tfst
 # "td" is short for "terraform destroy".
 alias td="terraform destroy"
 
+# "tdocs" is short for "terraform-docs".
+alias tdocs="terraform-docs markdown table --output-file README.md --output-mode inject . && bunx --bun prettier README.md --write"
+
 # "tda" is short for "terraform destroy -auto-approve".
 alias tda="terraform destroy -auto-approve"
 
