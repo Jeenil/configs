@@ -1965,6 +1965,9 @@ gcam() (
   gc --amend --edit-commit-message
 )
 
+# "gcp" is short for "git cherry-pick".
+alias gcp="git cherry-pick"
+
 # "gcs" is short for "git commit show", which will open a browser to view the last commit. You can
 # optionally supply a SHA1 to show a custom commit.
 gcs() (
