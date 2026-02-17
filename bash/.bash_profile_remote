@@ -1966,7 +1966,14 @@ gcam() (
 )
 
 # "gcp" is short for "git cherry-pick".
-alias gcp="git cherry-pick"
+gcp() (
+  set -euo pipefail # Exit on errors and undefined variables.
+
+  assert-in-git-repository
+
+  git cherry-pick "$@"
+  git push
+)
 
 # "gcs" is short for "git commit show", which will open a browser to view the last commit. You can
 # optionally supply a SHA1 to show a custom commit.
