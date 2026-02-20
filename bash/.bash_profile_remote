@@ -1066,6 +1066,28 @@ cdg() {
   cd "$repo_root"
 }
 
+# "cdr" is short for switching to the repositories directory.
+if [[ -d "$HOME/Repositories" ]]; then # Windows / macOS
+  REPOSITORIES_DIR="$HOME/Repositories"
+elif [[ -d "$HOME/repositories" ]]; then # Linux
+  REPOSITORIES_DIR="$HOME/repositories"
+elif [[ -d "/d/Repositories" ]]; then # Windows D drive (should have priority over C drive)
+  REPOSITORIES_DIR="/d/Repositories"
+elif [[ -d "/c/Repositories" ]]; then # Windows C drive
+  REPOSITORIES_DIR="/c/Repositories"
+fi
+if [[ -n "$REPOSITORIES_DIR" ]]; then
+  export REPOSITORIES_DIR
+  alias cdr='builtin cd $REPOSITORIES_DIR'
+
+  # By default, it is useful for shells to open in the repositories directory instead of the home
+  # directory. (But only do this if the shell is interactive and we are starting in the home
+  # directory.)
+  if [[ $- == *i* ]] && [[ "$PWD" == "$HOME" ]]; then
+    builtin cd "$REPOSITORIES_DIR"
+  fi
+fi
+
 # Turn off GitHub Copilot CLI prompts.
 alias copilot="copilot --yolo"
 
@@ -1278,28 +1300,6 @@ o() (
 # https://peps.python.org/pep-0773/#global-pip-command
 if command -v python &> /dev/null && ! command -v pip &> /dev/null; then
   alias pip="python -m pip"
-fi
-
-# "r" is short for switching to the repositories directory.
-if [[ -d "$HOME/Repositories" ]]; then # Windows / macOS
-  REPOSITORIES_DIR="$HOME/Repositories"
-elif [[ -d "$HOME/repositories" ]]; then # Linux
-  REPOSITORIES_DIR="$HOME/repositories"
-elif [[ -d "/d/Repositories" ]]; then # Windows D drive (should have priority over C drive)
-  REPOSITORIES_DIR="/d/Repositories"
-elif [[ -d "/c/Repositories" ]]; then # Windows C drive
-  REPOSITORIES_DIR="/c/Repositories"
-fi
-if [[ -n "$REPOSITORIES_DIR" ]]; then
-  export REPOSITORIES_DIR
-  alias cdr='builtin cd $REPOSITORIES_DIR'
-
-  # By default, it is useful for shells to open in the repositories directory instead of the home
-  # directory. (But only do this if the shell is interactive and we are starting in the home
-  # directory.)
-  if [[ $- == *i* ]] && [[ "$PWD" == "$HOME" ]]; then
-    builtin cd "$REPOSITORIES_DIR"
-  fi
 fi
 
 alias set-env='encrypt "$HOME/.env"'
