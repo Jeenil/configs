@@ -1270,15 +1270,15 @@ o() (
   fi
 
   if command -v chrome &> /dev/null; then
+    # Starting chrome from the terminal will block, so we have to have special handling.
     if [[ "${ID:-}" == "ubuntu" ]]; then
-      # - On Linux, starting chrome from the terminal will block, so we have to have special
-      #   handling.
       # - We remove the output to prevent the "Created TensorFlow Lite XNNPACK delegate for CPU."
       #   output from appearing.
       # - We cannot use aliases with "nohup" so we revert to using "google-chrome".
       nohup google-chrome "$url" > /dev/null 2>&1 &
     else
-      chrome "$url"
+      # We remove the output to prevent the "Appending output to nohup.out" message.
+      nohup chrome "$url" > /dev/null 2>&1 &
     fi
     return
   fi
