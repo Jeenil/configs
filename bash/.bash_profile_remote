@@ -1968,6 +1968,9 @@ gcam() (
   gc --amend --edit-commit-message
 )
 
+# "gcl" is short for "git clone".
+alias gcl="git clone"
+
 # "gcp" is short for "git cherry-pick".
 gcp() (
   set -euo pipefail # Exit on errors and undefined variables.
