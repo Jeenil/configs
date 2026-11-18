@@ -1027,7 +1027,7 @@ gpr() (
   # Second, use the Azure DevOps API to open a new pull request.
   local pull_request_text
   if [[ $# -eq 0 ]]; then
-    if [[ -z "${GITHUB_TOKEN_WORK:-${GITHUB_TOKEN:-}}" ]]; then
+    if [[ -z "$(get-github-token)" ]]; then
       # If the user does not have an API key, use a generic pull request title and description.
       echo "Using the first commit description as the pull request title & description."
       pull_request_text=$(get-first-branch-commit-description)

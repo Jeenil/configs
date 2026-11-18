@@ -408,10 +408,29 @@ get-branch-name-from-number() (
   echo "$branch_name"
 )
 
+# This will return the GitHub token for the GitHub Copilot API, or nothing if there is none. The
+# environment variables take priority. Otherwise, the token of the active "gh" account is used, so
+# that "GITHUB_TOKEN" does not have to be exported in the shell profile (which makes "gh auth
+# switch" fail).
+get-github-token() (
+  set -euo pipefail # Exit on errors and undefined variables.
+
+  if [[ -n "${GITHUB_TOKEN_WORK:-${GITHUB_TOKEN:-}}" ]]; then
+    echo "${GITHUB_TOKEN_WORK:-$GITHUB_TOKEN}"
+    return
+  fi
+
+  if ! command -v gh &> /dev/null; then
+    return
+  fi
+
+  gh auth token 2> /dev/null || true
+)
+
 get-default-commit-message() (
   set -euo pipefail # Exit on errors and undefined variables.
 
-  if [[ -z "${GITHUB_TOKEN_WORK:-${GITHUB_TOKEN:-}}" ]]; then
+  if [[ -z "$(get-github-token)" ]]; then
     echo "chore: update something"
   else
     echo "Getting the commit message from an LLM..." >&2
@@ -600,8 +619,8 @@ get-llm-commit-message() (
 
   assert-in-git-repository
 
-  if [[ -z "${GITHUB_TOKEN_WORK:-${GITHUB_TOKEN:-}}" ]]; then
-    echo "Error: Neither the \"GITHUB_TOKEN_WORK\" nor \"GITHUB_TOKEN\" environment variable is set." >&2
+  if [[ -z "$(get-github-token)" ]]; then
+    echo "Error: No GitHub token is available. Log in with \"gh auth login\"." >&2
     return 1
   fi
 
@@ -631,9 +650,10 @@ get-llm-output() (
   fi
   local prompt="$2"
 
-  local github_token="${GITHUB_TOKEN_WORK:-${GITHUB_TOKEN:-}}"
+  local github_token
+  github_token="$(get-github-token)"
   if [[ -z "$github_token" ]]; then
-    echo "Error: Neither the \"GITHUB_TOKEN_WORK\" nor \"GITHUB_TOKEN\" environment variable is set." >&2
+    echo "Error: No GitHub token is available. Log in with \"gh auth login\"." >&2
     return 1
   fi
 
@@ -643,7 +663,7 @@ get-llm-output() (
   # 2. jq pipes the JSON payload into curl.
   # 3. curl reads from stdin using "--data @-".
   local api_url="https://api.githubcopilot.com/chat/completions"
-  local model="${GITHUB_COPILOT_MODEL:-claude-opus-4.8}"
+  local model="${GITHUB_COPILOT_MODEL:-claude-opus-5.5}"
   local api_response
   api_response=$(
     printf "%s" "$prompt" | jq \
@@ -728,8 +748,8 @@ get-llm-pull-request-text() (
   local main_branch_name
   main_branch_name=$(get-main-branch-name)
 
-  if [[ -z "${GITHUB_TOKEN_WORK:-${GITHUB_TOKEN:-}}" ]]; then
-    echo "Error: Neither the \"GITHUB_TOKEN_WORK\" nor \"GITHUB_TOKEN\" environment variable is set." >&2
+  if [[ -z "$(get-github-token)" ]]; then
+    echo "Error: No GitHub token is available. Log in with \"gh auth login\"." >&2
     return 1
   fi
 
